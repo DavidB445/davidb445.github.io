@@ -44,22 +44,55 @@ document.getElementById('convertButton').addEventListener('click', () => {
     reader.readAsText(file);
 });
 
+// Manufacturer lookup table
+const manufacturerLookup = {
+    "04": "NXP Semiconductors",
+    "07": "Infineon Technologies",
+    "11": "STMicroelectronics",
+    "1F": "Broadcom",
+    "2E": "Sony Corporation",
+    "39": "Motorola",
+    "88": "Shanghai Fudan Microelectronics",
+    "8A": "Texas Instruments",
+    "0F": "NXP (former Philips Semiconductors)",
+    // Add more codes as needed
+};
+
 function displayParsedData(binData) {
     const sectorTableBody = document.getElementById('sectorTable').querySelector('tbody');
     sectorTableBody.innerHTML = ''; // Clear previous results
 
     // Extract Block 0 information
     const uid = Array.from(binData.slice(0, 4)).map(byte => byte.toString(16).padStart(2, '0')).join(' ').toUpperCase();
-    const manufacturerData = binData.slice(4, 16);
-    const manufacturerInfo = Array.from(manufacturerData).map(byte => byte.toString(16).padStart(2, '0')).join(' ').toUpperCase();
+    const bcc = binData[4];
+    const manufacturerCode = binData[5].toString(16).padStart(2, '0').toUpperCase();
+    const productionYear = 2000 + ((binData[6] & 0xF0) >> 4); // Upper 5 bits
+    const productionWeek = binData[6] & 0x0F; // Lower 5 bits
+
+    // Manufacturer name lookup
+    const manufacturerName = manufacturerLookup[manufacturerCode] || "Unknown Manufacturer";
 
     // Display UID and Manufacturer Data
     document.getElementById('info').innerHTML = `
         <p><strong>UID:</strong> ${uid}</p>
-        <p><strong>Manufacturer Data:</strong> ${manufacturerInfo}</p>
+        <p><strong>BCC:</strong> ${bcc.toString(16).padStart(2, '0').toUpperCase()} 
+           (Valid: ${validateBCC(binData.slice(0, 4), bcc) ? "Yes" : "No"})</p>
+        <p><strong>Manufacturer Code:</strong> ${manufacturerCode} (${manufacturerName})</p>
+        <p><strong>Production Year:</strong> ${productionYear}</p>
+        <p><strong>Production Week:</strong> ${productionWeek}</p>
     `;
 
-    // Parse sectors and access conditions
+    // Parse sectors and display
+    parseSectors(binData, sectorTableBody);
+}
+
+function validateBCC(uid, bcc) {
+    const calculatedBCC = uid[0] ^ uid[1] ^ uid[2] ^ uid[3];
+    return calculatedBCC === bcc;
+}
+
+function parseSectors(binData, sectorTableBody) {
+    // (Unchanged sector parsing logic)
     let blockIndex = 0;
 
     for (let sector = 0; blockIndex < binData.length; sector++) {
