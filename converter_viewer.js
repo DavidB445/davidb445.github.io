@@ -46,17 +46,44 @@ document.getElementById('convertButton').addEventListener('click', () => {
 
 // Manufacturer lookup table
 const manufacturerLookup = {
+    "00": "Unknown or Reserved",
     "04": "NXP Semiconductors",
+    "05": "Mikron",
     "07": "Infineon Technologies",
+    "0A": "Atmel",
+    "0B": "SLE (Siemens/Infineon)",
+    "0C": "HITAG (Philips/NXP)",
+    "0F": "NXP (former Philips Semiconductors)",
     "11": "STMicroelectronics",
+    "13": "Toshiba",
     "1F": "Broadcom",
+    "2B": "Intel Corporation",
     "2E": "Sony Corporation",
     "39": "Motorola",
+    "3F": "Microchip Technology",
+    "41": "ASK (Amplitude Shift Keying)",
+    "43": "Melexis",
+    "4A": "EM Microelectronic-Marin SA",
+    "4D": "Micron",
+    "55": "Magellan Technology",
+    "6A": "Samsung",
+    "7C": "Toshiba",
     "88": "Shanghai Fudan Microelectronics",
     "8A": "Texas Instruments",
-    "0F": "NXP (former Philips Semiconductors)",
-    // Add more codes as needed
+    "A0": "EMVCo (Payment Systems)",
+    "A1": "LEGIC Identsystems AG",
+    "B0": "Giesecke+Devrient",
+    "B3": "Samsung Electronics",
+    "C0": "RFID Components",
+    "C1": "Silicon Craft Technology",
+    "C2": "Zilog",
+    "D2": "Shanghai Huahong Integrated Circuit",
+    "E0": "SMARTRAC (now Avery Dennison RFID)",
+    "E1": "TagSys",
+    "F0": "Feitian Technologies",
+    "FF": "Test Manufacturer/Custom Chip",
 };
+
 
 function displayParsedData(binData) {
     const sectorTableBody = document.getElementById('sectorTable').querySelector('tbody');
