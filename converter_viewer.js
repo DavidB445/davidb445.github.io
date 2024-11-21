@@ -136,23 +136,23 @@ function parseSectors(binData, sectorTableBody) {
     let blockIndex = 0;
     let sectorCount = 0;
     const totalBlocks = binData.length / 16;  // Total number of blocks in the file
-    const is1KCard = totalBlocks === 64;  // Mifare Classic 1K has 64 blocks
-    const is4KCard = totalBlocks === 1024;  // Mifare Classic 4K has 1024 blocks
 
-    // Parse the card based on 1K or 4K structure
-    const blocksPerSector = is1KCard ? 4 : (is4KCard ? 16 : 0); // 4 blocks per sector for 1K, 16 for 4K
-    
+    // Correct detection for Mifare Classic 1K (64 blocks) and 4K (256 blocks)
+    const is1KCard = totalBlocks === 64;  // Mifare Classic 1K has 64 blocks
+    const is4KCard = totalBlocks === 256;  // Mifare Classic 4K has 256 blocks
+
+    // Both cards have 4 blocks per sector
+    const blocksPerSector = 4;
+
     // If it's not a 1K or 4K card, this part may not apply
-    if (blocksPerSector === 0) {
+    if (!is1KCard && !is4KCard) {
         console.error("Invalid card size or unsupported card type.");
         return;
     }
 
     // Loop through sectors and display keys and access conditions
     while (blockIndex < binData.length) {
-        const isBigSector = blockIndex >= 32 * 16; // Start of bigger sectors in 4K cards
-        const blocksInSector = isBigSector ? 16 : 4;
-        const trailerBlock = blockIndex + blocksInSector - 1;
+        const trailerBlock = blockIndex + blocksPerSector - 1;  // Trailer block (last block of the sector)
 
         // Extract Key A, Access bits, Key B from the trailer block
         const keyA = Array.from(binData.slice(trailerBlock * 16, trailerBlock * 16 + 6))
@@ -174,10 +174,11 @@ function parseSectors(binData, sectorTableBody) {
             <td>${accessConditions}</td>
         `;
 
-        blockIndex += blocksInSector;  // Move to next sector
+        blockIndex += blocksPerSector;  // Move to next sector
         sectorCount++;  // Increment sector number
     }
 }
+
 
 
 function decodeAccessBits(accessBits) {
