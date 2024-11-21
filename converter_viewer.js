@@ -150,15 +150,16 @@ function parseSectors(binData, sectorTableBody) {
     while (blockIndex < totalBlocks) {
         let blocksPerSector;
 
+        // Handle sectors 0-31: 4 blocks per sector
         if (sectorCount < 32) {
-            // For sectors 0-31 (4 blocks per sector)
             blocksPerSector = 4;
-        } else if (sectorCount < 40) {
-            // For sectors 32-39 (8 blocks per sector)
+        }
+        // Handle sectors 32-39: 8 blocks per sector (only for 4K cards)
+        else if (sectorCount >= 32 && sectorCount < 40) {
             blocksPerSector = 8;
         } else {
-            // Beyond sector 39, these might be empty or reserved
-            break;  // Exit loop as we don't need to process these sectors
+            // Beyond sector 39, skip any extra sectors for 4K cards
+            break;
         }
 
         // Ensure we don't process out-of-bounds data
@@ -166,9 +167,10 @@ function parseSectors(binData, sectorTableBody) {
             break;
         }
 
-        // Handle sector trailer block (last block in the sector)
+        // Extract the sector trailer block (last block in the sector)
         const trailerBlock = blockIndex + blocksPerSector - 1;
 
+        // Otherwise, extract key and access information
         const keyA = Array.from(binData.slice(trailerBlock * 16, trailerBlock * 16 + 6))
             .map(byte => byte.toString(16).padStart(2, '0')).join(' ').toUpperCase();
 
@@ -178,7 +180,7 @@ function parseSectors(binData, sectorTableBody) {
         const keyB = Array.from(binData.slice(trailerBlock * 16 + 10, trailerBlock * 16 + 16))
             .map(byte => byte.toString(16).padStart(2, '0')).join(' ').toUpperCase();
 
-        // Add to table
+        // Add the sector information to the table
         const row = sectorTableBody.insertRow();
         row.innerHTML = `
             <td>${sectorCount}</td>
@@ -192,6 +194,7 @@ function parseSectors(binData, sectorTableBody) {
         sectorCount++;  // Increment sector number
     }
 }
+
 
 function decodeAccessBits(accessBits) {
     // Decode access bits based on Mifare Classic specification
