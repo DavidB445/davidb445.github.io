@@ -174,7 +174,7 @@ function parseSectors(binData, sectorTableBody) {
         const keyA = Array.from(binData.slice(trailerBlock * 16, trailerBlock * 16 + 6))
             .map(byte => byte.toString(16).padStart(2, '0')).join(' ').toUpperCase();
 
-        const accessBits = binData.slice(trailerBlock * 16 + 6, trailerBlock * 16 + 10);
+        const accessBits = binData.slice(trailerBlock * 16 + 6, trailerBlock * 16 + 9);  // Only 3 bytes for access conditions
         const accessConditions = decodeAccessBits(accessBits);
 
         const keyB = Array.from(binData.slice(trailerBlock * 16 + 10, trailerBlock * 16 + 16))
@@ -196,9 +196,9 @@ function parseSectors(binData, sectorTableBody) {
 }
 
 function decodeAccessBits(accessBits) {
-    // Convert bytes to binary string
+    // Ensure we're decoding exactly 3 bytes (24 bits)
     const bits = Array.from(accessBits)
-        .map(b => b.toString(2).padStart(8, '0'))
+        .map(b => b.toString(2).padStart(8, '0'))  // Convert each byte to binary and pad to 8 bits
         .join('');
 
     // Extract read, write, and increment/decrement permission bits
@@ -244,4 +244,3 @@ function decodeAccessBits(accessBits) {
         Read: ${readAccess}, Write: ${writeAccess}, Increment/Decrement: ${incDecAccess}
     `;
 }
-
