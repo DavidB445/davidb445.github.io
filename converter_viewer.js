@@ -154,9 +154,9 @@ function parseSectors(binData, sectorTableBody) {
         if (sectorCount < 32) {
             blocksPerSector = 4;
         }
-        // Handle sectors 32-39: 8 blocks per sector (only for 4K cards)
+        // Handle sectors 32-39: 16 blocks per sector (only for 4K cards)
         else if (sectorCount >= 32 && sectorCount < 40) {
-            blocksPerSector = 8;
+            blocksPerSector = 16;
         } else {
             // Beyond sector 39, skip any extra sectors for 4K cards
             break;
@@ -170,7 +170,7 @@ function parseSectors(binData, sectorTableBody) {
         // Extract the sector trailer block (last block in the sector)
         const trailerBlock = blockIndex + blocksPerSector - 1;
 
-        // Otherwise, extract key and access information
+        // Extract key and access information
         const keyA = Array.from(binData.slice(trailerBlock * 16, trailerBlock * 16 + 6))
             .map(byte => byte.toString(16).padStart(2, '0')).join(' ').toUpperCase();
 
@@ -194,7 +194,6 @@ function parseSectors(binData, sectorTableBody) {
         sectorCount++;  // Increment sector number
     }
 }
-
 
 function decodeAccessBits(accessBits) {
     // Decode access bits based on Mifare Classic specification
