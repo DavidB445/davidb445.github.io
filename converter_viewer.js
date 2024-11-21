@@ -99,11 +99,14 @@ function displayParsedData(binData) {
     // Manufacturer name lookup
     const manufacturerName = manufacturerLookup[manufacturerCode] || "Unknown Manufacturer";
 
+    // Validate and possibly calculate BCC
+    const bccResult = validateBCC(binData.slice(0, 4), bcc);
+
     // Display UID and Manufacturer Data
     document.getElementById('info').innerHTML = `
         <p><strong>UID:</strong> ${uid}</p>
         <p><strong>BCC:</strong> ${bcc.toString(16).padStart(2, '0').toUpperCase()} 
-           (Valid: ${validateBCC(binData.slice(0, 4), bcc) ? "Yes" : "No"})</p>
+           (Valid: ${bccResult.isValid ? "Yes" : "No"}${!bccResult.isValid ? `, Valid BCC: ${bccResult.calculatedBCC}` : ''})</p>
         <p><strong>Manufacturer Code:</strong> ${manufacturerCode} (${manufacturerName})</p>
         <p><strong>Production Year:</strong> ${productionYear}</p>
         <p><strong>Production Week:</strong> ${productionWeek}</p>
@@ -114,8 +117,19 @@ function displayParsedData(binData) {
 }
 
 function validateBCC(uid, bcc) {
+    // Calculate the valid BCC by XOR-ing the 4 UID bytes
     const calculatedBCC = uid[0] ^ uid[1] ^ uid[2] ^ uid[3];
-    return calculatedBCC === bcc;
+    
+    // Check if the provided BCC matches the calculated BCC
+    const isValid = calculatedBCC === bcc;
+    
+    // If invalid, return the calculated BCC value
+    if (!isValid) {
+        return { isValid: false, calculatedBCC: calculatedBCC.toString(16).padStart(2, '0').toUpperCase() };
+    }
+
+    // If valid, return true
+    return { isValid: true };
 }
 
 function parseSectors(binData, sectorTableBody) {
