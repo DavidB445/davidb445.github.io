@@ -174,6 +174,7 @@ function parseSectors(binData, sectorTableBody) {
         const keyA = Array.from(binData.slice(trailerBlock * 16, trailerBlock * 16 + 6))
             .map(byte => byte.toString(16).padStart(2, '0')).join(' ').toUpperCase();
 
+        // Extract the access bits from the correct position in binData
         const accessBits = binData.slice(trailerBlock * 16 + 6, trailerBlock * 16 + 9);  // Only 3 bytes for access conditions
         const accessConditions = decodeAccessBits(accessBits);
 
@@ -196,6 +197,7 @@ function parseSectors(binData, sectorTableBody) {
     }
 }
 
+// Function to decode the access bits
 function decodeAccessBits(accessBits) {
     // Ensure we're decoding exactly 3 bytes (24 bits)
     const bits = Array.from(accessBits)
@@ -203,7 +205,6 @@ function decodeAccessBits(accessBits) {
         .join('');
 
     // Extract read, write, and increment/decrement permission bits
-    // These slices are based on the MIFARE Classic access control structure
     const readBits = bits.slice(0, 3);
     const writeBits = bits.slice(3, 6);
     const incDecBits = bits.slice(6, 9);
@@ -246,4 +247,3 @@ function decodeAccessBits(accessBits) {
         Read: ${readAccess}, Write: ${writeAccess}, Increment/Decrement: ${incDecAccess}
     `;
 }
-
