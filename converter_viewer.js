@@ -196,14 +196,52 @@ function parseSectors(binData, sectorTableBody) {
 }
 
 function decodeAccessBits(accessBits) {
-    // Decode access bits based on Mifare Classic specification
-    const bits = Array.from(accessBits).map(b => b.toString(2).padStart(8, '0')).join('');
-    const c1 = bits.slice(0, 3);
-    const c2 = bits.slice(4, 7);
-    const c3 = bits.slice(8, 11);
+    // Convert bytes to binary string
+    const bits = Array.from(accessBits)
+        .map(b => b.toString(2).padStart(8, '0'))
+        .join('');
 
-    // Simplified decoding
+    // Extract read, write, and increment/decrement permission bits
+    const readBits = bits.slice(0, 3);
+    const writeBits = bits.slice(3, 6);
+    const incDecBits = bits.slice(6, 9);
+
+    // Define access conditions for each permission group
+    const accessConditions = {
+        read: {
+            "000": "No access",
+            "001": "Always accessible",
+            "010": "Accessible with Key A",
+            "011": "Accessible with Key B",
+            "100": "Read access without authentication",
+            "101": "Accessible with either Key A or Key B",
+        },
+        write: {
+            "000": "No access",
+            "001": "Always accessible",
+            "010": "Accessible with Key A",
+            "011": "Accessible with Key B",
+            "100": "Write access without authentication",
+            "101": "Accessible with either Key A or Key B",
+        },
+        increment: {
+            "000": "No access",
+            "001": "Always accessible",
+            "010": "Accessible with Key A",
+            "011": "Accessible with Key B",
+            "100": "Increment/Decrement without authentication",
+            "101": "Accessible with either Key A or Key B",
+        },
+    };
+
+    // Get the human-readable access rights
+    const readAccess = accessConditions.read[readBits] || "Invalid";
+    const writeAccess = accessConditions.write[writeBits] || "Invalid";
+    const incDecAccess = accessConditions.increment[incDecBits] || "Invalid";
+
+    // Return the decoded access rights
     return `
-        Read: ${c1}, Write: ${c2}, Increment/Decrement: ${c3}
+        Read: ${readAccess}, Write: ${writeAccess}, Increment/Decrement: ${incDecAccess}
     `;
 }
+
