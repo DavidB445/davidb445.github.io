@@ -1,11 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Page Title</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFC to BIN Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        input, button {
+            margin: 10px;
+        }
+    </style>
 </head>
 <body>
-
-<h1>HTML Heading</h1>
-
+    <h1>NFC to BIN Converter</h1>
+    <p>Select a Flipper Zero .nfc file to convert it to a .bin file:</p>
+    <input type="file" id="fileInput" />
+    <button id="convertButton">Convert</button>
+    <a id="downloadLink" style="display: none;">Download BIN File</a>
+    <script src="converter.js"></script>
 </body>
 </html>
