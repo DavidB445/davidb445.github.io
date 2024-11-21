@@ -203,6 +203,7 @@ function decodeAccessBits(accessBits) {
         .join('');
 
     // Extract read, write, and increment/decrement permission bits
+    // These slices are based on the MIFARE Classic access control structure
     const readBits = bits.slice(0, 3);
     const writeBits = bits.slice(3, 6);
     const incDecBits = bits.slice(6, 9);
@@ -235,7 +236,7 @@ function decodeAccessBits(accessBits) {
         },
     };
 
-    // Get the human-readable access rights
+    // Get the human-readable access rights for each permission
     const readAccess = accessConditions.read[readBits] || "Invalid";
     const writeAccess = accessConditions.write[writeBits] || "Invalid";
     const incDecAccess = accessConditions.increment[incDecBits] || "Invalid";
