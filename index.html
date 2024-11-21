@@ -3,24 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NFC to BIN Converter</title>
+    <title>NFC to BIN Converter & Viewer</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
             margin: 20px;
         }
-        input, button {
-            margin: 10px;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <h1>NFC to BIN Converter</h1>
-    <p>Select a Flipper Zero .nfc file to convert it to a .bin file:</p>
+    <h1>NFC to BIN Converter & Viewer</h1>
+    <p>Select a Flipper Zero `.nfc` file:</p>
     <input type="file" id="fileInput" />
-    <button id="convertButton">Convert</button>
+    <button id="convertButton">Convert to BIN & Display Data</button>
     <a id="downloadLink" style="display: none;">Download BIN File</a>
-    <script src="converter.js"></script>
+
+    <h2>Extracted Information</h2>
+    <div id="info"></div>
+
+    <h2>Sector Data</h2>
+    <table id="sectorTable">
+        <thead>
+            <tr>
+                <th>Sector</th>
+                <th>Key A</th>
+                <th>Key B</th>
+                <th>Access Conditions</th>
+                <th>Decoded Access</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <script src="converter_viewer.js"></script>
 </body>
 </html>
