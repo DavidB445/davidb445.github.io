@@ -137,9 +137,6 @@ function parseSectors(binData, sectorTableBody) {
     let sectorCount = 0;
     const totalBlocks = binData.length / 16;  // Total number of blocks in the file
 
-    // Mifare Classic 1K and 4K cards both have 4 blocks per sector
-    const blocksPerSector = 4;
-
     // Check if the card is 1K or 4K
     const is1KCard = totalBlocks === 64;  // Mifare Classic 1K
     const is4KCard = totalBlocks === 256;  // Mifare Classic 4K
@@ -149,59 +146,52 @@ function parseSectors(binData, sectorTableBody) {
         return;
     }
 
+    // Loop through sectors
     while (blockIndex < totalBlocks) {
+        let blocksPerSector;
+
         if (sectorCount < 32) {
             // For sectors 0-31 (4 blocks per sector)
-            const trailerBlock = blockIndex + blocksPerSector - 1;
-
-            const keyA = Array.from(binData.slice(trailerBlock * 16, trailerBlock * 16 + 6))
-                .map(byte => byte.toString(16).padStart(2, '0')).join(' ').toUpperCase();
-
-            const accessBits = binData.slice(trailerBlock * 16 + 6, trailerBlock * 16 + 10);
-            const accessConditions = decodeAccessBits(accessBits);
-
-            const keyB = Array.from(binData.slice(trailerBlock * 16 + 10, trailerBlock * 16 + 16))
-                .map(byte => byte.toString(16).padStart(2, '0')).join(' ').toUpperCase();
-
-            const row = sectorTableBody.insertRow();
-            row.innerHTML = `
-                <td>${sectorCount}</td>
-                <td>${keyA}</td>
-                <td>${keyB}</td>
-                <td>${Array.from(accessBits).map(b => b.toString(16).padStart(2, '0')).join(' ').toUpperCase()}</td>
-                <td>${accessConditions}</td>
-            `;
-
-            blockIndex += blocksPerSector;  // Move to next sector
-        } else {
+            blocksPerSector = 4;
+        } else if (sectorCount < 40) {
             // For sectors 32-39 (8 blocks per sector)
-            const trailerBlock = blockIndex + 8 - 1;  // Last block of the sector
-
-            const keyA = Array.from(binData.slice(trailerBlock * 16, trailerBlock * 16 + 6))
-                .map(byte => byte.toString(16).padStart(2, '0')).join(' ').toUpperCase();
-
-            const accessBits = binData.slice(trailerBlock * 16 + 6, trailerBlock * 16 + 10);
-            const accessConditions = decodeAccessBits(accessBits);
-
-            const keyB = Array.from(binData.slice(trailerBlock * 16 + 10, trailerBlock * 16 + 16))
-                .map(byte => byte.toString(16).padStart(2, '0')).join(' ').toUpperCase();
-
-            const row = sectorTableBody.insertRow();
-            row.innerHTML = `
-                <td>${sectorCount}</td>
-                <td>${keyA}</td>
-                <td>${keyB}</td>
-                <td>${Array.from(accessBits).map(b => b.toString(16).padStart(2, '0')).join(' ').toUpperCase()}</td>
-                <td>${accessConditions}</td>
-            `;
-
-            blockIndex += 8;  // Move to next sector
+            blocksPerSector = 8;
+        } else {
+            // Beyond sector 39, these might be empty or reserved
+            break;  // Exit loop as we don't need to process these sectors
         }
 
-        sectorCount++;
+        // Ensure we don't process out-of-bounds data
+        if (blockIndex + blocksPerSector > totalBlocks) {
+            break;
+        }
+
+        // Handle sector trailer block (last block in the sector)
+        const trailerBlock = blockIndex + blocksPerSector - 1;
+
+        const keyA = Array.from(binData.slice(trailerBlock * 16, trailerBlock * 16 + 6))
+            .map(byte => byte.toString(16).padStart(2, '0')).join(' ').toUpperCase();
+
+        const accessBits = binData.slice(trailerBlock * 16 + 6, trailerBlock * 16 + 10);
+        const accessConditions = decodeAccessBits(accessBits);
+
+        const keyB = Array.from(binData.slice(trailerBlock * 16 + 10, trailerBlock * 16 + 16))
+            .map(byte => byte.toString(16).padStart(2, '0')).join(' ').toUpperCase();
+
+        // Add to table
+        const row = sectorTableBody.insertRow();
+        row.innerHTML = `
+            <td>${sectorCount}</td>
+            <td>${keyA}</td>
+            <td>${keyB}</td>
+            <td>${Array.from(accessBits).map(b => b.toString(16).padStart(2, '0')).join(' ').toUpperCase()}</td>
+            <td>${accessConditions}</td>
+        `;
+
+        blockIndex += blocksPerSector;  // Move to the next sector
+        sectorCount++;  // Increment sector number
     }
 }
-
 
 function decodeAccessBits(accessBits) {
     // Decode access bits based on Mifare Classic specification
